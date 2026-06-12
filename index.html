@@ -16,6 +16,7 @@
       --accent-dark: #234735;
       --line: #e3e1da;       /* borders */
       --error: #a3322b;
+      --done: #4a6b3a;
     }
 
     * { box-sizing: border-box; }
@@ -41,11 +42,23 @@
       border-radius: 10px;
     }
 
+    /* The signed-in view gets a wider card to fit the goal list */
+    .card.wide { max-width: 540px; }
+
     h1 {
       margin: 0 0 4px;
       font-size: 26px;
       font-weight: normal;
       letter-spacing: 0.5px;
+    }
+
+    h2 {
+      margin: 28px 0 10px;
+      font-size: 14px;
+      font-weight: normal;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--ink-soft);
     }
 
     .tagline {
@@ -101,11 +114,31 @@
     }
 
     .hidden { display: none; }
+
+    /* ===== Goal list styles ===== */
+    .goal {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .goal:last-child { border-bottom: none; }
+
+    .goal-title { font-size: 16px; }
+
+    .goal-meta {
+      margin-top: 3px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .goal.done .goal-title {
+      color: var(--done);
+    }
   </style>
 </head>
 <body>
 
-  <!-- ===== View 1: the sign-in form (shown when nobody is logged in) ===== -->
+  <!-- ===== View 1: the sign-in form ===== -->
   <div class="card" id="login-view">
     <h1>Family Hub</h1>
     <p class="tagline">Sign in to continue.</p>
@@ -120,11 +153,17 @@
     <p class="error" id="error-message"></p>
   </div>
 
-  <!-- ===== View 2: the welcome screen (shown after a successful login) ===== -->
-  <div class="card hidden" id="welcome-view">
-    <h1>Welcome back</h1>
+  <!-- ===== View 2: the goals dashboard (after login) ===== -->
+  <div class="card wide hidden" id="welcome-view">
+    <h1>Family Hub</h1>
     <p class="tagline" id="welcome-message"></p>
-    <p>You are signed in. The goals dashboard will live here next.</p>
+
+    <h2>Family goals</h2>
+    <div id="family-goals"></div>
+
+    <h2>Individual goals</h2>
+    <div id="individual-goals"></div>
+
     <button id="sign-out-button">Sign out</button>
   </div>
 
@@ -132,25 +171,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    /* ===== 1. Connect to your Supabase project =====
-       Replace these two values with YOUR Project URL and
-       Publishable key from the Supabase dashboard.            */
+    /* ===== 1. Connect to your Supabase project ===== */
     const SUPABASE_URL = 'https://lsfnfvanmidcesklxpoz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_NUiXhSLwm5fNIzGll1QlOA_Hhr9MHe7';
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    /* ===== 2. Grab the page elements we need to control ===== */
+    /* ===== 2. Page elements ===== */
     const loginView      = document.getElementById('login-view');
     const welcomeView    = document.getElementById('welcome-view');
     const errorMessage   = document.getElementById('error-message');
     const welcomeMessage = document.getElementById('welcome-message');
 
-    /* ===== 3. Switch between the two views ===== */
+    /* ===== 3. Switch between views ===== */
     function showWelcome(user) {
       welcomeMessage.textContent = 'Signed in as ' + user.email;
       loginView.classList.add('hidden');
       welcomeView.classList.remove('hidden');
+      loadGoals();   // fetch the goal list every time the dashboard appears
     }
 
     function showLogin() {
@@ -158,7 +196,68 @@
       welcomeView.classList.add('hidden');
     }
 
-    /* ===== 4. Sign in when the button is clicked ===== */
+    /* ===== 4. Fetch goals from the database and draw them =====
+       db.from('goals').select('*') means:
+       "from the goals table, give me every column of every row
+        my permissions allow me to see."                          */
+    async function loadGoals() {
+      const { data: goals, error } = await db
+        .from('goals')
+        .select('*')
+        .order('target_date', { ascending: true });
+
+      if (error) {
+        document.getElementById('family-goals').textContent =
+          'Could not load goals: ' + error.message;
+        return;
+      }
+
+      renderList('family-goals',     goals.filter(g => g.scope === 'family'));
+      renderList('individual-goals', goals.filter(g => g.scope === 'individual'));
+    }
+
+    /* Turn a list of goal rows into HTML inside the given container */
+    function renderList(containerId, goals) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';   // clear out whatever was there before
+
+      if (goals.length === 0) {
+        container.innerHTML = '<p class="goal-meta">Nothing here yet.</p>';
+        return;
+      }
+
+      for (const goal of goals) {
+        const item = document.createElement('div');
+        item.className = 'goal' + (goal.status === 'done' ? ' done' : '');
+
+        const title = document.createElement('div');
+        title.className = 'goal-title';
+        title.textContent = goal.title;
+
+        const meta = document.createElement('div');
+        meta.className = 'goal-meta';
+        meta.textContent =
+          goal.owner_name + ' · ' +
+          formatStatus(goal.status) + ' · due ' +
+          goal.target_date;
+
+        item.appendChild(title);
+        item.appendChild(meta);
+        container.appendChild(item);
+      }
+    }
+
+    /* Make "not_started" read as "Not started", etc. */
+    function formatStatus(status) {
+      const labels = {
+        not_started: 'Not started',
+        in_progress: 'In progress',
+        done: 'Done'
+      };
+      return labels[status] || status;
+    }
+
+    /* ===== 5. Sign in ===== */
     document.getElementById('sign-in-button').addEventListener('click', async () => {
       errorMessage.textContent = '';
 
@@ -174,15 +273,13 @@
       }
     });
 
-    /* ===== 5. Sign out ===== */
+    /* ===== 6. Sign out ===== */
     document.getElementById('sign-out-button').addEventListener('click', async () => {
       await db.auth.signOut();
       showLogin();
     });
 
-    /* ===== 6. On page load: if a session already exists, skip the form =====
-       Supabase remembers logins in the browser, so family members
-       won't have to type their password on every single visit.    */
+    /* ===== 7. On page load: resume an existing session if there is one ===== */
     db.auth.getSession().then(({ data }) => {
       if (data.session) {
         showWelcome(data.session.user);
