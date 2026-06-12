@@ -74,7 +74,7 @@
       color: var(--ink-soft);
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px 12px;
       font-size: 15px;
@@ -85,7 +85,7 @@
       border-radius: 6px;
     }
 
-    input:focus {
+    input:focus, select:focus {
       outline: 2px solid var(--accent);
       outline-offset: 1px;
       border-color: var(--accent);
@@ -163,6 +163,26 @@
 
     <h2>Individual goals</h2>
     <div id="individual-goals"></div>
+
+    <h2>Add a goal</h2>
+
+    <label for="new-title">Goal</label>
+    <input id="new-title" type="text" placeholder="Read 12 books this year">
+
+    <label for="new-owner">Owner</label>
+    <input id="new-owner" type="text" placeholder="Elena, or Family">
+
+    <label for="new-scope">Scope</label>
+    <select id="new-scope">
+      <option value="individual">Individual</option>
+      <option value="family">Family</option>
+    </select>
+
+    <label for="new-date">Target date</label>
+    <input id="new-date" type="date">
+
+    <button id="add-goal-button">Add goal</button>
+    <p class="error" id="add-error"></p>
 
     <button id="sign-out-button">Sign out</button>
   </div>
@@ -257,7 +277,42 @@
       return labels[status] || status;
     }
 
-    /* ===== 5. Sign in ===== */
+    /* ===== 5. Add a new goal =====
+       db.from('goals').insert({...}) writes one new row.
+       The RLS insert policy is what makes this allowed.  */
+    document.getElementById('add-goal-button').addEventListener('click', async () => {
+      const addError = document.getElementById('add-error');
+      addError.textContent = '';
+
+      const newGoal = {
+        title:       document.getElementById('new-title').value.trim(),
+        owner_name:  document.getElementById('new-owner').value.trim(),
+        scope:       document.getElementById('new-scope').value,
+        target_date: document.getElementById('new-date').value,
+        status:      'not_started'
+      };
+
+      /* Simple validation: refuse empty fields before bothering the database */
+      if (!newGoal.title || !newGoal.owner_name || !newGoal.target_date) {
+        addError.textContent = 'Please fill in the goal, owner, and target date.';
+        return;
+      }
+
+      const { error } = await db.from('goals').insert(newGoal);
+
+      if (error) {
+        addError.textContent = 'Could not save: ' + error.message;
+        return;
+      }
+
+      /* Success: clear the form and redraw the list with the new goal in it */
+      document.getElementById('new-title').value = '';
+      document.getElementById('new-owner').value = '';
+      document.getElementById('new-date').value  = '';
+      loadGoals();
+    });
+
+    /* ===== 6. Sign in ===== */
     document.getElementById('sign-in-button').addEventListener('click', async () => {
       errorMessage.textContent = '';
 
