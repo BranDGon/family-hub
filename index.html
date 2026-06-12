@@ -6,17 +6,16 @@
   <title>Family Hub</title>
 
   <style>
-    /* ===== Design tokens: change these to restyle the whole page ===== */
+    /* ===== Design tokens ===== */
     :root {
-      --ink: #2b2b27;        /* main text */
-      --ink-soft: #6b6a62;   /* secondary text */
-      --paper: #faf9f6;      /* page background */
-      --card: #ffffff;       /* card background */
-      --accent: #2f5d46;     /* deep green - buttons and focus */
+      --ink: #2b2b27;
+      --ink-soft: #6b6a62;
+      --paper: #faf9f6;
+      --card: #ffffff;
+      --accent: #2f5d46;
       --accent-dark: #234735;
-      --line: #e3e1da;       /* borders */
+      --line: #e3e1da;
       --error: #a3322b;
-      --done: #4a6b3a;
     }
 
     * { box-sizing: border-box; }
@@ -25,7 +24,7 @@
       margin: 0;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       background: var(--paper);
       color: var(--ink);
@@ -35,15 +34,14 @@
     .card {
       width: 100%;
       max-width: 380px;
-      margin: 24px;
+      margin: 40px 24px;
       padding: 40px 36px;
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 10px;
     }
 
-    /* The signed-in view gets a wider card to fit the goal list */
-    .card.wide { max-width: 540px; }
+    .card.wide { max-width: 620px; }
 
     h1 {
       margin: 0 0 4px;
@@ -53,30 +51,26 @@
     }
 
     h2 {
-      margin: 28px 0 10px;
-      font-size: 14px;
+      margin: 30px 0 10px;
+      font-size: 13px;
       font-weight: normal;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--ink-soft);
     }
 
-    .tagline {
-      margin: 0 0 28px;
-      font-size: 14px;
-      color: var(--ink-soft);
-    }
+    .tagline { margin: 0 0 8px; font-size: 14px; color: var(--ink-soft); }
 
     label {
       display: block;
-      margin: 16px 0 6px;
+      margin: 14px 0 6px;
       font-size: 13px;
       color: var(--ink-soft);
     }
 
     input, select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 12px;
       font-size: 15px;
       font-family: inherit;
       color: var(--ink);
@@ -92,10 +86,8 @@
     }
 
     button {
-      width: 100%;
-      margin-top: 24px;
-      padding: 11px;
-      font-size: 15px;
+      padding: 10px 16px;
+      font-size: 14px;
       font-family: inherit;
       color: #fff;
       background: var(--accent);
@@ -105,40 +97,129 @@
     }
 
     button:hover { background: var(--accent-dark); }
-
-    .error {
-      margin: 14px 0 0;
-      font-size: 14px;
-      color: var(--error);
-      min-height: 1em;
+    button.full { width: 100%; margin-top: 20px; }
+    button.quiet {
+      background: none;
+      color: var(--accent);
+      border: 1px solid var(--line);
     }
+    button.quiet:hover { background: var(--paper); }
 
+    .error { margin: 12px 0 0; font-size: 14px; color: var(--error); min-height: 1em; }
     .hidden { display: none; }
 
-    /* ===== Goal list styles ===== */
-    .goal {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--line);
+    /* ===== Header row ===== */
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .goal:last-child { border-bottom: none; }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex: none;
+    }
+
+    .avatar.small {
+      width: 26px;
+      height: 26px;
+      font-size: 12px;
+      background: var(--paper);
+      color: var(--accent);
+      border: 1px solid var(--line);
+    }
+
+    /* ===== Stats row ===== */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 12px 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .stat .num { font-size: 22px; }
+    .stat .lbl { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+    /* ===== Goal cards ===== */
+    .goal {
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .goal-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
     .goal-title { font-size: 16px; }
+    .goal-meta { margin-top: 4px; font-size: 13px; color: var(--ink-soft); }
+    .goal-note { margin-top: 6px; font-size: 13px; color: var(--ink-soft); font-style: italic; }
 
-    .goal-meta {
-      margin-top: 3px;
+    .pill {
+      font-size: 12px;
+      font-family: inherit;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex: none;
+    }
+
+    .pill-not  { background: #efede6; color: #6b6a62; }
+    .pill-prog { background: #f6ead2; color: #7a5418; }
+    .pill-done { background: #e6eedd; color: #3c5a2c; }
+
+    .group-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 14px 0 8px;
+      font-size: 14px;
+    }
+
+    /* ===== Collapsible sections (native, no JavaScript needed) ===== */
+    details { margin-top: 10px; }
+
+    summary {
+      cursor: pointer;
       font-size: 13px;
-      color: var(--ink-soft);
+      color: var(--accent);
     }
 
-    .goal.done .goal-title {
-      color: var(--done);
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
     }
+
+    .note-row { display: flex; gap: 8px; }
+    .note-row input { flex: 1; }
   </style>
 </head>
 <body>
 
-  <!-- ===== View 1: the sign-in form ===== -->
+  <!-- ===== View 1: sign in ===== -->
   <div class="card" id="login-view">
     <h1>Family Hub</h1>
     <p class="tagline">Sign in to continue.</p>
@@ -149,14 +230,42 @@
     <label for="password">Password</label>
     <input id="password" type="password" autocomplete="current-password">
 
-    <button id="sign-in-button">Sign in</button>
+    <button class="full" id="sign-in-button">Sign in</button>
     <p class="error" id="error-message"></p>
   </div>
 
-  <!-- ===== View 2: the goals dashboard (after login) ===== -->
+  <!-- ===== View 2: dashboard ===== -->
   <div class="card wide hidden" id="welcome-view">
-    <h1>Family Hub</h1>
-    <p class="tagline" id="welcome-message"></p>
+    <div class="header-row">
+      <div>
+        <h1>Family Hub</h1>
+        <p class="tagline" id="welcome-message"></p>
+      </div>
+      <div class="avatar" id="user-avatar"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="stat-active">–</div><div class="lbl">Active goals</div></div>
+      <div class="stat"><div class="num" id="stat-due">–</div><div class="lbl">Due this month</div></div>
+      <div class="stat"><div class="num" id="stat-done">–</div><div class="lbl">Completed this year</div></div>
+    </div>
+
+    <details>
+      <summary>+ Add a goal</summary>
+      <label for="new-title">Goal</label>
+      <input id="new-title" type="text" placeholder="Read 12 books this year">
+      <label for="new-owner">Owner</label>
+      <input id="new-owner" type="text" placeholder="Elena, or Family">
+      <label for="new-scope">Scope</label>
+      <select id="new-scope">
+        <option value="individual">Individual</option>
+        <option value="family">Family</option>
+      </select>
+      <label for="new-date">Target date</label>
+      <input id="new-date" type="date">
+      <button class="full" id="add-goal-button">Add goal</button>
+      <p class="error" id="add-error"></p>
+    </details>
 
     <h2>Family goals</h2>
     <div id="family-goals"></div>
@@ -164,122 +273,258 @@
     <h2>Individual goals</h2>
     <div id="individual-goals"></div>
 
-    <h2>Add a goal</h2>
+    <h2>Recently completed</h2>
+    <div id="completed-goals"></div>
 
-    <label for="new-title">Goal</label>
-    <input id="new-title" type="text" placeholder="Read 12 books this year">
-
-    <label for="new-owner">Owner</label>
-    <input id="new-owner" type="text" placeholder="Elena, or Family">
-
-    <label for="new-scope">Scope</label>
-    <select id="new-scope">
-      <option value="individual">Individual</option>
-      <option value="family">Family</option>
-    </select>
-
-    <label for="new-date">Target date</label>
-    <input id="new-date" type="date">
-
-    <button id="add-goal-button">Add goal</button>
-    <p class="error" id="add-error"></p>
-
-    <button id="sign-out-button">Sign out</button>
+    <button class="full quiet" id="sign-out-button">Sign out</button>
   </div>
 
-  <!-- ===== Load the Supabase library from a CDN ===== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    /* ===== 1. Connect to your Supabase project ===== */
+    /* ===== 1. Connection ===== */
     const SUPABASE_URL = 'https://lsfnfvanmidcesklxpoz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_NUiXhSLwm5fNIzGll1QlOA_Hhr9MHe7';
-
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    /* ===== 2. Page elements ===== */
+    let currentUser = null;   /* remembered after sign-in, used to sign notes */
+
+    /* ===== 2. Small helpers ===== */
+
+    /* Create an element with a class and text in one line */
+    function el(tag, cls, text) {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    /* "elena@example.com" -> "Elena" */
+    function displayName(user) {
+      const name = user.email.split('@')[0];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+
+    /* "2026-08-15" -> "Aug 15" */
+    function fmtDate(dateString) {
+      if (!dateString) return '';
+      return new Date(dateString.slice(0, 10) + 'T00:00:00')
+        .toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    const STATUS_LABELS = {
+      not_started: 'Not started',
+      in_progress: 'In progress',
+      done: 'Done'
+    };
+
+    const PILL_CLASSES = {
+      not_started: 'pill pill-not',
+      in_progress: 'pill pill-prog',
+      done: 'pill pill-done'
+    };
+
+    /* ===== 3. View switching ===== */
+    function showWelcome(user) {
+      currentUser = user;
+      welcomeMessage.textContent = 'Signed in as ' + displayName(user);
+      document.getElementById('user-avatar').textContent =
+        displayName(user).charAt(0);
+      loginView.classList.add('hidden');
+      welcomeView.classList.remove('hidden');
+      loadDashboard();
+    }
+
+    function showLogin() {
+      currentUser = null;
+      loginView.classList.remove('hidden');
+      welcomeView.classList.add('hidden');
+    }
+
     const loginView      = document.getElementById('login-view');
     const welcomeView    = document.getElementById('welcome-view');
     const errorMessage   = document.getElementById('error-message');
     const welcomeMessage = document.getElementById('welcome-message');
 
-    /* ===== 3. Switch between views ===== */
-    function showWelcome(user) {
-      welcomeMessage.textContent = 'Signed in as ' + user.email;
-      loginView.classList.add('hidden');
-      welcomeView.classList.remove('hidden');
-      loadGoals();   // fetch the goal list every time the dashboard appears
-    }
-
-    function showLogin() {
-      loginView.classList.remove('hidden');
-      welcomeView.classList.add('hidden');
-    }
-
-    /* ===== 4. Fetch goals from the database and draw them =====
-       db.from('goals').select('*') means:
-       "from the goals table, give me every column of every row
-        my permissions allow me to see."                          */
-    async function loadGoals() {
-      const { data: goals, error } = await db
-        .from('goals')
-        .select('*')
+    /* ===== 4. Load everything and draw the dashboard ===== */
+    async function loadDashboard() {
+      /* Two reads: all goals, and all notes (newest first) */
+      const { data: goals, error: goalsError } = await db
+        .from('goals').select('*')
         .order('target_date', { ascending: true });
 
-      if (error) {
+      const { data: notes, error: notesError } = await db
+        .from('goal_notes').select('*')
+        .order('created_at', { ascending: false });
+
+      if (goalsError || notesError) {
         document.getElementById('family-goals').textContent =
-          'Could not load goals: ' + error.message;
+          'Could not load: ' + (goalsError || notesError).message;
         return;
       }
 
-      renderList('family-goals',     goals.filter(g => g.scope === 'family'));
-      renderList('individual-goals', goals.filter(g => g.scope === 'individual'));
-    }
-
-    /* Turn a list of goal rows into HTML inside the given container */
-    function renderList(containerId, goals) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';   // clear out whatever was there before
-
-      if (goals.length === 0) {
-        container.innerHTML = '<p class="goal-meta">Nothing here yet.</p>';
-        return;
+      /* Find the newest note for each goal. Notes arrive newest-first,
+         so the first one we meet per goal_id is the latest. */
+      const latestNote = {};
+      for (const note of notes) {
+        if (!(note.goal_id in latestNote)) latestNote[note.goal_id] = note;
       }
 
-      for (const goal of goals) {
-        const item = document.createElement('div');
-        item.className = 'goal' + (goal.status === 'done' ? ' done' : '');
+      /* --- Stats --- */
+      const now = new Date();
+      const active = goals.filter(g => g.status !== 'done');
+      const dueThisMonth = active.filter(g => {
+        const d = new Date(g.target_date + 'T00:00:00');
+        return d.getMonth() === now.getMonth() &&
+               d.getFullYear() === now.getFullYear();
+      });
+      const doneThisYear = goals.filter(g =>
+        g.status === 'done' &&
+        g.completed_at &&
+        new Date(g.completed_at).getFullYear() === now.getFullYear()
+      );
 
-        const title = document.createElement('div');
-        title.className = 'goal-title';
-        title.textContent = goal.title;
+      document.getElementById('stat-active').textContent = active.length;
+      document.getElementById('stat-due').textContent    = dueThisMonth.length;
+      document.getElementById('stat-done').textContent   = doneThisYear.length;
 
-        const meta = document.createElement('div');
-        meta.className = 'goal-meta';
-        meta.textContent =
-          goal.owner_name + ' · ' +
-          formatStatus(goal.status) + ' · due ' +
-          goal.target_date;
+      /* --- Family goals (active only) --- */
+      const familyBox = document.getElementById('family-goals');
+      familyBox.innerHTML = '';
+      const familyGoals = active.filter(g => g.scope === 'family');
+      if (familyGoals.length === 0) {
+        familyBox.appendChild(el('p', 'goal-meta', 'No family goals yet.'));
+      }
+      for (const goal of familyGoals) {
+        familyBox.appendChild(goalCard(goal, latestNote[goal.id], false));
+      }
 
-        item.appendChild(title);
-        item.appendChild(meta);
-        container.appendChild(item);
+      /* --- Individual goals, grouped by owner --- */
+      const indivBox = document.getElementById('individual-goals');
+      indivBox.innerHTML = '';
+      const indivGoals = active.filter(g => g.scope === 'individual');
+      if (indivGoals.length === 0) {
+        indivBox.appendChild(el('p', 'goal-meta', 'No individual goals yet.'));
+      }
+
+      /* Collect unique owner names, keeping first-seen order */
+      const owners = [...new Set(indivGoals.map(g => g.owner_name))];
+      for (const owner of owners) {
+        const head = el('div', 'group-head');
+        head.appendChild(el('div', 'avatar small', owner.charAt(0)));
+        head.appendChild(el('span', null, owner));
+        indivBox.appendChild(head);
+
+        for (const goal of indivGoals.filter(g => g.owner_name === owner)) {
+          indivBox.appendChild(goalCard(goal, latestNote[goal.id], true));
+        }
+      }
+
+      /* --- Recently completed (newest first, up to 6) --- */
+      const doneBox = document.getElementById('completed-goals');
+      doneBox.innerHTML = '';
+      const completed = goals
+        .filter(g => g.status === 'done')
+        .sort((a, b) => (b.completed_at || '').localeCompare(a.completed_at || ''))
+        .slice(0, 6);
+      if (completed.length === 0) {
+        doneBox.appendChild(el('p', 'goal-meta', 'Nothing completed yet. Soon!'));
+      }
+      for (const goal of completed) {
+        const item = el('div', 'goal');
+        const top = el('div', 'goal-top');
+        top.appendChild(el('span', 'goal-title', goal.title + ' — ' + goal.owner_name));
+        top.appendChild(el('span', 'pill pill-done',
+          'Done · ' + fmtDate(goal.completed_at)));
+        item.appendChild(top);
+        doneBox.appendChild(item);
       }
     }
 
-    /* Make "not_started" read as "Not started", etc. */
-    function formatStatus(status) {
-      const labels = {
-        not_started: 'Not started',
-        in_progress: 'In progress',
-        done: 'Done'
-      };
-      return labels[status] || status;
+    /* ===== 5. Build one goal card ===== */
+    function goalCard(goal, note, hideOwner) {
+      const card = el('div', 'goal');
+
+      const top = el('div', 'goal-top');
+      top.appendChild(el('span', 'goal-title', goal.title));
+      top.appendChild(el('span', PILL_CLASSES[goal.status],
+        STATUS_LABELS[goal.status]));
+      card.appendChild(top);
+
+      const metaText = (hideOwner ? '' : goal.owner_name + ' · ') +
+        'due ' + fmtDate(goal.target_date);
+      card.appendChild(el('div', 'goal-meta', metaText));
+
+      if (note) {
+        card.appendChild(el('div', 'goal-note',
+          '"' + note.note + '" — ' + note.author_name));
+      }
+
+      /* Collapsible update controls */
+      const details = el('details');
+      details.appendChild(el('summary', null, 'Update'));
+
+      const actions = el('div', 'actions');
+
+      /* Status dropdown */
+      const statusSelect = el('select');
+      for (const value of ['not_started', 'in_progress', 'done']) {
+        const option = el('option', null, STATUS_LABELS[value]);
+        option.value = value;
+        if (value === goal.status) option.selected = true;
+        statusSelect.appendChild(option);
+      }
+      statusSelect.addEventListener('change', () =>
+        updateStatus(goal, statusSelect.value));
+      actions.appendChild(statusSelect);
+
+      /* Note input + save button */
+      const noteRow = el('div', 'note-row');
+      const noteInput = el('input');
+      noteInput.placeholder = 'Add a progress note...';
+      const noteButton = el('button', 'quiet', 'Save note');
+      noteButton.addEventListener('click', () =>
+        addNote(goal, noteInput.value.trim()));
+      noteRow.appendChild(noteInput);
+      noteRow.appendChild(noteButton);
+      actions.appendChild(noteRow);
+
+      details.appendChild(actions);
+      card.appendChild(details);
+
+      return card;
     }
 
-    /* ===== 5. Add a new goal =====
-       db.from('goals').insert({...}) writes one new row.
-       The RLS insert policy is what makes this allowed.  */
+    /* ===== 6. Write actions ===== */
+
+    async function updateStatus(goal, newStatus) {
+      const changes = { status: newStatus };
+      /* History rule: record WHEN it was finished; clear it if reopened */
+      changes.completed_at =
+        newStatus === 'done' ? new Date().toISOString() : null;
+
+      const { error } = await db
+        .from('goals')
+        .update(changes)
+        .eq('id', goal.id);   /* only the row whose id matches this goal */
+
+      if (error) alert('Could not update: ' + error.message);
+      loadDashboard();
+    }
+
+    async function addNote(goal, text) {
+      if (!text) return;
+
+      const { error } = await db.from('goal_notes').insert({
+        goal_id: goal.id,
+        author_name: displayName(currentUser),
+        note: text
+      });
+
+      if (error) alert('Could not save note: ' + error.message);
+      loadDashboard();
+    }
+
     document.getElementById('add-goal-button').addEventListener('click', async () => {
       const addError = document.getElementById('add-error');
       addError.textContent = '';
@@ -292,35 +537,30 @@
         status:      'not_started'
       };
 
-      /* Simple validation: refuse empty fields before bothering the database */
       if (!newGoal.title || !newGoal.owner_name || !newGoal.target_date) {
         addError.textContent = 'Please fill in the goal, owner, and target date.';
         return;
       }
 
       const { error } = await db.from('goals').insert(newGoal);
-
       if (error) {
         addError.textContent = 'Could not save: ' + error.message;
         return;
       }
 
-      /* Success: clear the form and redraw the list with the new goal in it */
       document.getElementById('new-title').value = '';
       document.getElementById('new-owner').value = '';
       document.getElementById('new-date').value  = '';
-      loadGoals();
+      loadDashboard();
     });
 
-    /* ===== 6. Sign in ===== */
+    /* ===== 7. Auth ===== */
     document.getElementById('sign-in-button').addEventListener('click', async () => {
       errorMessage.textContent = '';
-
       const email    = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       const { data, error } = await db.auth.signInWithPassword({ email, password });
-
       if (error) {
         errorMessage.textContent = error.message;
       } else {
@@ -328,17 +568,13 @@
       }
     });
 
-    /* ===== 6. Sign out ===== */
     document.getElementById('sign-out-button').addEventListener('click', async () => {
       await db.auth.signOut();
       showLogin();
     });
 
-    /* ===== 7. On page load: resume an existing session if there is one ===== */
     db.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        showWelcome(data.session.user);
-      }
+      if (data.session) showWelcome(data.session.user);
     });
   </script>
 
