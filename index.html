@@ -1,10 +1,194 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Family Hub</title>
-  </head>
-  <body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Hub</title>
+
+  <style>
+    /* ===== Design tokens: change these to restyle the whole page ===== */
+    :root {
+      --ink: #2b2b27;        /* main text */
+      --ink-soft: #6b6a62;   /* secondary text */
+      --paper: #faf9f6;      /* page background */
+      --card: #ffffff;       /* card background */
+      --accent: #2f5d46;     /* deep green - buttons and focus */
+      --accent-dark: #234735;
+      --line: #e3e1da;       /* borders */
+      --error: #a3322b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 380px;
+      margin: 24px;
+      padding: 40px 36px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 26px;
+      font-weight: normal;
+      letter-spacing: 0.5px;
+    }
+
+    .tagline {
+      margin: 0 0 28px;
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 6px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 11px;
+      font-size: 15px;
+      font-family: inherit;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--accent-dark); }
+
+    .error {
+      margin: 14px 0 0;
+      font-size: 14px;
+      color: var(--error);
+      min-height: 1em;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== View 1: the sign-in form (shown when nobody is logged in) ===== -->
+  <div class="card" id="login-view">
     <h1>Family Hub</h1>
-    <p>Coming soon.</p>
-  </body>
+    <p class="tagline">Sign in to continue.</p>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email">
+
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password">
+
+    <button id="sign-in-button">Sign in</button>
+    <p class="error" id="error-message"></p>
+  </div>
+
+  <!-- ===== View 2: the welcome screen (shown after a successful login) ===== -->
+  <div class="card hidden" id="welcome-view">
+    <h1>Welcome back</h1>
+    <p class="tagline" id="welcome-message"></p>
+    <p>You are signed in. The goals dashboard will live here next.</p>
+    <button id="sign-out-button">Sign out</button>
+  </div>
+
+  <!-- ===== Load the Supabase library from a CDN ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    /* ===== 1. Connect to your Supabase project =====
+       Replace these two values with YOUR Project URL and
+       Publishable key from the Supabase dashboard.            */
+    const SUPABASE_URL = 'https://lsfnfvanmidcesklxpoz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_NUiXhSLwm5fNIzGll1QlOA_Hhr9MHe7';
+
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* ===== 2. Grab the page elements we need to control ===== */
+    const loginView      = document.getElementById('login-view');
+    const welcomeView    = document.getElementById('welcome-view');
+    const errorMessage   = document.getElementById('error-message');
+    const welcomeMessage = document.getElementById('welcome-message');
+
+    /* ===== 3. Switch between the two views ===== */
+    function showWelcome(user) {
+      welcomeMessage.textContent = 'Signed in as ' + user.email;
+      loginView.classList.add('hidden');
+      welcomeView.classList.remove('hidden');
+    }
+
+    function showLogin() {
+      loginView.classList.remove('hidden');
+      welcomeView.classList.add('hidden');
+    }
+
+    /* ===== 4. Sign in when the button is clicked ===== */
+    document.getElementById('sign-in-button').addEventListener('click', async () => {
+      errorMessage.textContent = '';
+
+      const email    = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorMessage.textContent = error.message;
+      } else {
+        showWelcome(data.user);
+      }
+    });
+
+    /* ===== 5. Sign out ===== */
+    document.getElementById('sign-out-button').addEventListener('click', async () => {
+      await db.auth.signOut();
+      showLogin();
+    });
+
+    /* ===== 6. On page load: if a session already exists, skip the form =====
+       Supabase remembers logins in the browser, so family members
+       won't have to type their password on every single visit.    */
+    db.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        showWelcome(data.session.user);
+      }
+    });
+  </script>
+
+</body>
 </html>
