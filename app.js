@@ -1,8 +1,8 @@
 /* ===== Family Hub shared code =====
    Loaded by every page. Your keys live here, in ONE place. */
 
-const SUPABASE_URL = 'PASTE-YOUR-PROJECT-URL-HERE';
-const SUPABASE_KEY = 'PASTE-YOUR-PUBLISHABLE-KEY-HERE';
+const SUPABASE_URL = 'https://lsfnfvanmidcesklxpoz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NUiXhSLwm5fNIzGll1QlOA_Hhr9MHe7';
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
