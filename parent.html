@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parents · Family Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="card">
+    <div class="nav" id="nav"></div>
+
+    <h1>Parent page</h1>
+    <p class="tagline">Post and review homeschool assignments.</p>
+
+    <details open>
+      <summary>+ Post an assignment</summary>
+
+      <label for="a-student">Student</label>
+      <select id="a-student">
+        <option value="Avery">Avery</option>
+        <option value="Evan">Evan</option>
+      </select>
+
+      <label for="a-title">Assignment</label>
+      <input id="a-title" type="text" placeholder="Chapter 4 reading questions">
+
+      <label for="a-subject">Subject</label>
+      <input id="a-subject" type="text" placeholder="Science">
+
+      <label for="a-due">Due date</label>
+      <input id="a-due" type="date">
+
+      <label for="a-instructions">Instructions (optional)</label>
+      <textarea id="a-instructions" rows="2"
+        placeholder="Answer in complete sentences."></textarea>
+
+      <button class="full" id="post-button">Post assignment</button>
+      <p class="error" id="post-error"></p>
+    </details>
+
+    <div id="assignment-lists"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+  <script>
+    mountNav('parent.html');
+
+    async function load() {
+      const user = await requireAuth();
+      if (!user) return;   /* not signed in; requireAuth already redirected */
+
+      const { data: assignments, error } = await db
+        .from('assignments').select('*')
+        .order('due_date', { ascending: true });
+
+      const box = document.getElementById('assignment-lists');
+      box.innerHTML = '';
+
+      if (error) {
+        box.textContent = 'Could not load: ' + error.message;
+        return;
+      }
+
+      /* One section per student, in nav order */
+      for (const student of ['Avery', 'Evan']) {
+        box.appendChild(el('h2', null, student));
+        const theirs = assignments.filter(a => a.assigned_to === student);
+
+        if (theirs.length === 0) {
+          box.appendChild(el('p', 'item-meta', 'No assignments yet.'));
+          continue;
+        }
+
+        for (const a of theirs) {
+          const item = el('div', 'item');
+          const top = el('div', 'item-top');
+          top.appendChild(el('span', 'item-title', a.title));
+          top.appendChild(a.status === 'done'
+            ? el('span', 'pill pill-done', 'Done · ' + fmtDate(a.done_at))
+            : el('span', 'pill pill-todo', 'To do'));
+          item.appendChild(top);
+          item.appendChild(el('div', 'item-meta',
+            a.subject + ' · due ' + fmtDate(a.due_date)));
+          if (a.instructions) {
+            item.appendChild(el('div', 'item-body', a.instructions));
+          }
+          box.appendChild(item);
+        }
+      }
+    }
+
+    document.getElementById('post-button').addEventListener('click', async () => {
+      const postError = document.getElementById('post-error');
+      postError.textContent = '';
+
+      const newAssignment = {
+        assigned_to:  document.getElementById('a-student').value,
+        title:        document.getElementById('a-title').value.trim(),
+        subject:      document.getElementById('a-subject').value.trim(),
+        due_date:     document.getElementById('a-due').value,
+        instructions: document.getElementById('a-instructions').value.trim()
+        /* no status here: the database default fills in "assigned" */
+      };
+
+      if (!newAssignment.title || !newAssignment.subject || !newAssignment.due_date) {
+        postError.textContent = 'Please fill in the assignment, subject, and due date.';
+        return;
+      }
+
+      const { error } = await db.from('assignments').insert(newAssignment);
+      if (error) {
+        postError.textContent = 'Could not post: ' + error.message;
+        return;
+      }
+
+      document.getElementById('a-title').value = '';
+      document.getElementById('a-subject').value = '';
+      document.getElementById('a-due').value = '';
+      document.getElementById('a-instructions').value = '';
+      load();
+    });
+
+    load();
+  </script>
+
+</body>
+</html>

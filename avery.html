@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avery · Family Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="card">
+    <div class="nav" id="nav"></div>
+
+    <div class="header-row">
+      <div>
+        <h1 id="page-title"></h1>
+        <p class="tagline">Your homeschool assignments.</p>
+      </div>
+      <div class="avatar" id="page-avatar"></div>
+    </div>
+
+    <h2>To do</h2>
+    <div id="todo-list"></div>
+
+    <h2>Finished</h2>
+    <div id="done-list"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+  <script>
+    /* The ONE line that makes this page Avery's.
+       Evan's page is identical except for this constant. */
+    const STUDENT = 'Avery';
+
+    mountNav(STUDENT.toLowerCase() + '.html');
+    document.getElementById('page-title').textContent = STUDENT + "'s page";
+    document.getElementById('page-avatar').textContent = STUDENT.charAt(0);
+
+    async function load() {
+      const user = await requireAuth();
+      if (!user) return;
+
+      /* .eq() filters ON THE SERVER: only this student's rows
+         are even sent to the browser.                          */
+      const { data: assignments, error } = await db
+        .from('assignments').select('*')
+        .eq('assigned_to', STUDENT)
+        .order('due_date', { ascending: true });
+
+      const todoBox = document.getElementById('todo-list');
+      const doneBox = document.getElementById('done-list');
+      todoBox.innerHTML = '';
+      doneBox.innerHTML = '';
+
+      if (error) {
+        todoBox.textContent = 'Could not load: ' + error.message;
+        return;
+      }
+
+      const todo = assignments.filter(a => a.status !== 'done');
+      const done = assignments.filter(a => a.status === 'done');
+
+      if (todo.length === 0) {
+        todoBox.appendChild(el('p', 'item-meta', 'All caught up. Nice work!'));
+      }
+      for (const a of todo) {
+        const item = el('div', 'item');
+        const top = el('div', 'item-top');
+        top.appendChild(el('span', 'item-title', a.title));
+        top.appendChild(el('span', 'pill pill-todo', 'due ' + fmtDate(a.due_date)));
+        item.appendChild(top);
+        item.appendChild(el('div', 'item-meta', a.subject));
+        if (a.instructions) {
+          item.appendChild(el('div', 'item-body', a.instructions));
+        }
+
+        const actions = el('div', 'actions');
+        const doneButton = el('button', 'quiet', 'Mark done');
+        doneButton.addEventListener('click', () => markDone(a));
+        actions.appendChild(doneButton);
+        item.appendChild(actions);
+
+        todoBox.appendChild(item);
+      }
+
+      if (done.length === 0) {
+        doneBox.appendChild(el('p', 'item-meta', 'Nothing finished yet.'));
+      }
+      for (const a of done) {
+        const item = el('div', 'item');
+        const top = el('div', 'item-top');
+        top.appendChild(el('span', 'item-title', a.title));
+        top.appendChild(el('span', 'pill pill-done', 'Done · ' + fmtDate(a.done_at)));
+        item.appendChild(top);
+        item.appendChild(el('div', 'item-meta', a.subject));
+        doneBox.appendChild(item);
+      }
+    }
+
+    async function markDone(assignment) {
+      const { error } = await db
+        .from('assignments')
+        .update({ status: 'done', done_at: new Date().toISOString() })
+        .eq('id', assignment.id);
+
+      if (error) alert('Could not update: ' + error.message);
+      load();
+    }
+
+    load();
+  </script>
+
+</body>
+</html>
