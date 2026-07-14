@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Family Hub</title>
-
+  <link rel="stylesheet" href="styles.css">
   <style>
     /* ===== Design tokens ===== */
     :root {
@@ -236,6 +236,8 @@
 
   <!-- ===== View 2: dashboard ===== -->
   <div class="card wide hidden" id="welcome-view">
+    <div class="nav" id="nav"></div>
+
     <div class="header-row">
       <div>
         <h1>Family Hub</h1>
@@ -280,37 +282,15 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
 
   <script>
-    /* ===== 1. Connection ===== */
-    const SUPABASE_URL = 'https://lsfnfvanmidcesklxpoz.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_NUiXhSLwm5fNIzGll1QlOA_Hhr9MHe7';
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    /* Connection (db), el(), displayName(), and fmtDate() now
+       come from app.js - your keys live there, in one place. */
+
+    mountNav('index.html');
 
     let currentUser = null;   /* remembered after sign-in, used to sign notes */
-
-    /* ===== 2. Small helpers ===== */
-
-    /* Create an element with a class and text in one line */
-    function el(tag, cls, text) {
-      const node = document.createElement(tag);
-      if (cls) node.className = cls;
-      if (text !== undefined) node.textContent = text;
-      return node;
-    }
-
-    /* "elena@example.com" -> "Elena" */
-    function displayName(user) {
-      const name = user.email.split('@')[0];
-      return name.charAt(0).toUpperCase() + name.slice(1);
-    }
-
-    /* "2026-08-15" -> "Aug 15" */
-    function fmtDate(dateString) {
-      if (!dateString) return '';
-      return new Date(dateString.slice(0, 10) + 'T00:00:00')
-        .toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    }
 
     const STATUS_LABELS = {
       not_started: 'Not started',
