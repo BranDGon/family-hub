@@ -6,7 +6,7 @@
   <title>Avery · Family Hub</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="theme-avery">
 
   <div class="card">
     <div class="nav" id="nav"></div>
@@ -70,16 +70,30 @@
         top.appendChild(el('span', 'item-title', a.title));
         top.appendChild(el('span', 'pill pill-todo', 'due ' + fmtDate(a.due_date)));
         item.appendChild(top);
-        item.appendChild(el('div', 'item-meta', a.subject));
+
+        const meta = el('div', 'item-meta');
+        meta.appendChild(el('span', subjectChipClass(a.subject), a.subject));
+        item.appendChild(meta);
+
         if (a.instructions) {
           item.appendChild(el('div', 'item-body', a.instructions));
         }
+        if (a.link_url) {
+          const lessonLink = el('a', 'lesson-link', 'Open lesson →');
+          lessonLink.href = a.link_url;
+          lessonLink.target = '_blank';   /* opens in a new tab */
+          lessonLink.rel = 'noopener';
+          item.appendChild(lessonLink);
+        }
 
-        const actions = el('div', 'actions');
-        const doneButton = el('button', 'quiet', 'Mark done');
-        doneButton.addEventListener('click', () => markDone(a));
-        actions.appendChild(doneButton);
-        item.appendChild(actions);
+        /* Sign-off checkbox: ticking it marks the assignment done */
+        const check = el('label', 'done-check');
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.addEventListener('change', () => setDone(a, true));
+        check.appendChild(box);
+        check.appendChild(el('span', null, 'I finished this assignment'));
+        item.appendChild(check);
 
         todoBox.appendChild(item);
       }
@@ -93,15 +107,32 @@
         top.appendChild(el('span', 'item-title', a.title));
         top.appendChild(el('span', 'pill pill-done', 'Done · ' + fmtDate(a.done_at)));
         item.appendChild(top);
-        item.appendChild(el('div', 'item-meta', a.subject));
+
+        const meta = el('div', 'item-meta');
+        meta.appendChild(el('span', subjectChipClass(a.subject), a.subject));
+        item.appendChild(meta);
+
+        /* Already checked; unticking reopens it (misclicks happen) */
+        const check = el('label', 'done-check');
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = true;
+        box.addEventListener('change', () => setDone(a, false));
+        check.appendChild(box);
+        check.appendChild(el('span', null, 'Finished'));
+        item.appendChild(check);
+
         doneBox.appendChild(item);
       }
     }
 
-    async function markDone(assignment) {
+    async function setDone(assignment, isDone) {
       const { error } = await db
         .from('assignments')
-        .update({ status: 'done', done_at: new Date().toISOString() })
+        .update({
+          status:  isDone ? 'done' : 'assigned',
+          done_at: isDone ? new Date().toISOString() : null
+        })
         .eq('id', assignment.id);
 
       if (error) alert('Could not update: ' + error.message);
