@@ -156,3 +156,51 @@ button.quiet:hover { background: var(--paper); }
 
 details { margin-top: 10px; }
 summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+
+.lesson-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+/* ===== Per-student page themes =====
+   The body class swaps the accent tokens; everything
+   built on var(--accent) recolors itself automatically. */
+body.theme-avery { --accent: #a34a6b; --accent-dark: #833a56; }
+body.theme-evan  { --accent: #3a5f8a; --accent-dark: #2c4a6d; }
+
+body[class*="theme-"] .item { border-left: 4px solid var(--accent); }
+
+/* ===== Subject chips ===== */
+.chip {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.chip-0 { background: #f6ead2; color: #7a5418; }
+.chip-1 { background: #e1eef5; color: #2c5a75; }
+.chip-2 { background: #e6eedd; color: #3c5a2c; }
+.chip-3 { background: #f3e3ea; color: #7d3a5a; }
+.chip-4 { background: #e9e5f5; color: #4a3e7d; }
+.chip-5 { background: #efe7dc; color: #6b4f2f; }
+
+/* ===== Sign-off checkbox ===== */
+.done-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.done-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
