@@ -1,8 +1,8 @@
 /* ===== Family Hub shared code =====
    Loaded by every page. Your keys live here, in ONE place. */
 
-const SUPABASE_URL = 'PASTE-YOUR-PROJECT-URL-HERE';
-const SUPABASE_KEY = 'PASTE-YOUR-PUBLISHABLE-KEY-HERE';
+const SUPABASE_URL = 'https://lsfnfvanmidcesklxpoz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NUiXhSLwm5fNIzGll1QlOA_Hhr9MHe7';
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -11,8 +11,8 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
    Used to stamp assignments with the account they belong to,
    which is what the security policies check. */
 const FAMILY_IDS = {
-  'Avery': 'PASTE-AVERYS-USER-UUID-HERE',
-  'Evan':  'PASTE-EVANS-USER-UUID-HERE'
+  'Avery': '9c775046-7ac0-4e98-96c0-871169d4f1e7',
+  'Evan':  '9d9f6a26-f4b3-4966-a0da-83a152810bf2'
 };
 
 /* ----- Helpers ----- */
