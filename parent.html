@@ -36,6 +36,9 @@
       <textarea id="a-instructions" rows="2"
         placeholder="Answer in complete sentences."></textarea>
 
+      <label for="a-link">Lesson link (optional)</label>
+      <input id="a-link" type="url" placeholder="https://...">
+
       <button class="full" id="post-button">Post assignment</button>
       <p class="error" id="post-error"></p>
     </details>
@@ -82,10 +85,21 @@
             ? el('span', 'pill pill-done', 'Done · ' + fmtDate(a.done_at))
             : el('span', 'pill pill-todo', 'To do'));
           item.appendChild(top);
-          item.appendChild(el('div', 'item-meta',
-            a.subject + ' · due ' + fmtDate(a.due_date)));
+
+          const meta = el('div', 'item-meta');
+          meta.appendChild(el('span', subjectChipClass(a.subject), a.subject));
+          meta.appendChild(el('span', null, ' due ' + fmtDate(a.due_date)));
+          item.appendChild(meta);
+
           if (a.instructions) {
             item.appendChild(el('div', 'item-body', a.instructions));
+          }
+          if (a.link_url) {
+            const lessonLink = el('a', 'lesson-link', 'Open lesson →');
+            lessonLink.href = a.link_url;
+            lessonLink.target = '_blank';
+            lessonLink.rel = 'noopener';
+            item.appendChild(lessonLink);
           }
           box.appendChild(item);
         }
@@ -96,12 +110,24 @@
       const postError = document.getElementById('post-error');
       postError.textContent = '';
 
+      const student = document.getElementById('a-student').value;
+      const link = document.getElementById('a-link').value.trim();
+
+      /* Links must be real web addresses - this also blocks
+         anything sneaky from ever being stored as a link */
+      if (link && !link.startsWith('http')) {
+        postError.textContent = 'Links should start with http:// or https://';
+        return;
+      }
+
       const newAssignment = {
-        assigned_to:  document.getElementById('a-student').value,
+        assigned_to:  student,
+        student_id:   FAMILY_IDS[student],   /* the account this belongs to */
         title:        document.getElementById('a-title').value.trim(),
         subject:      document.getElementById('a-subject').value.trim(),
         due_date:     document.getElementById('a-due').value,
-        instructions: document.getElementById('a-instructions').value.trim()
+        instructions: document.getElementById('a-instructions').value.trim(),
+        link_url:     link || null
         /* no status here: the database default fills in "assigned" */
       };
 
@@ -120,6 +146,7 @@
       document.getElementById('a-subject').value = '';
       document.getElementById('a-due').value = '';
       document.getElementById('a-instructions').value = '';
+      document.getElementById('a-link').value = '';
       load();
     });
 
