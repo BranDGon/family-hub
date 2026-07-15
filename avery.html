@@ -19,6 +19,11 @@
       <div class="avatar" id="page-avatar"></div>
     </div>
 
+    <label class="photo-link hidden" id="photo-label">
+      Change my photo
+      <input type="file" id="photo-input" accept="image/*" class="hidden">
+    </label>
+
     <h2>To do</h2>
     <div id="todo-list"></div>
 
@@ -139,7 +144,43 @@
       load();
     }
 
+    /* ----- Profile photo ----- */
+    async function initAvatar(user) {
+      const avatar = document.getElementById('page-avatar');
+      const url = await avatarUrl(FAMILY_IDS[STUDENT]);
+      if (url) {
+        avatar.textContent = '';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = STUDENT;
+        avatar.appendChild(img);
+      }
+
+      /* Only show "Change my photo" to the page's own student -
+         the storage policy enforces this anyway; hiding it is
+         just politeness. */
+      if (user.id !== FAMILY_IDS[STUDENT]) return;
+
+      document.getElementById('photo-label').classList.remove('hidden');
+      document.getElementById('photo-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const small = await shrinkImage(file);
+        const { error } = await db.storage
+          .from('avatars')
+          .upload(user.id + '.jpg', small, {
+            upsert: true,               /* replace any previous photo */
+            contentType: 'image/jpeg'
+          });
+
+        if (error) alert('Could not upload: ' + error.message);
+        initAvatar(user);
+      });
+    }
+
     load();
+    requireAuth().then(user => { if (user) initAvatar(user); });
   </script>
 
 </body>
