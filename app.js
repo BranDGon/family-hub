@@ -11,8 +11,8 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
    Used to stamp assignments with the account they belong to,
    which is what the security policies check. */
 const FAMILY_IDS = {
-  'Avery': '9c775046-7ac0-4e98-96c0-871169d4f1e7',
-  'Evan':  '9d9f6a26-f4b3-4966-a0da-83a152810bf2'
+  'Avery': 'PASTE-AVERYS-USER-UUID-HERE',
+  'Evan':  'PASTE-EVANS-USER-UUID-HERE'
 };
 
 /* ----- Helpers ----- */
@@ -45,6 +45,31 @@ function subjectChipClass(subject) {
   let sum = 0;
   for (const ch of subject.toLowerCase()) sum += ch.charCodeAt(0);
   return 'chip chip-' + (sum % 6);
+}
+
+/* ----- Profile photos (Supabase Storage) ----- */
+
+/* Ask Storage for a temporary, family-only link to this
+   person's photo. Returns null if they haven't uploaded one. */
+async function avatarUrl(userId) {
+  const { data, error } = await db.storage
+    .from('avatars')
+    .createSignedUrl(userId + '.jpg', 3600);   /* link lasts 1 hour */
+  return error ? null : data.signedUrl;
+}
+
+/* Shrink a chosen photo to a small square BEFORE uploading,
+   so a 4 MB phone photo becomes a ~30 KB avatar. */
+async function shrinkImage(file, size = 256) {
+  const bitmap = await createImageBitmap(file);
+  const side = Math.min(bitmap.width, bitmap.height);
+  const sx = (bitmap.width - side) / 2;   /* crop to centered square */
+  const sy = (bitmap.height - side) / 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  canvas.getContext('2d').drawImage(bitmap, sx, sy, side, side, 0, 0, size, size);
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
 }
 
 /* ----- Auth guard -----
