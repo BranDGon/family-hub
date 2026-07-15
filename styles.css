@@ -163,6 +163,13 @@ button.quiet:hover { background: var(--paper); }
   object-fit: cover;
 }
 
+/* Larger profile photo in the kid page header */
+#page-avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 28px;
+}
+
 .photo-link {
   display: inline-block;
   margin-top: 6px;
