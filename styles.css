@@ -154,6 +154,21 @@ button.quiet:hover { background: var(--paper); }
   display: flex; align-items: center; justify-content: center;
   font-size: 15px;
   flex: none;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
 }
 
 /* ===== Item cards (goals, assignments) ===== */
